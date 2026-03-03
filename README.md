@@ -2,6 +2,7 @@
 
 Game controller emulator for Windows and Linux
 
+![Build](https://github.com/prevter/phantompad-server/actions/workflows/build.yml/badge.svg)
 ![GitHub License](https://img.shields.io/github/license/prevter/phantompad-server)
 ![GitHub Downloads](https://img.shields.io/github/downloads/prevter/phantompad-server/total)
 [![GitHub Release](https://img.shields.io/github/v/release/prevter/phantompad-server)](https://github.com/prevter/phantompad-server/releases/latest)
