@@ -85,7 +85,6 @@ Section "Phantom Pad" SecMain
     SimpleSC::InstallService "${SERVICE_NAME}" "${SERVICE_DISPLAY}" 16 2 "$INSTDIR\${APP_EXE}" "" "" ""
     Pop $0
     ${If} $0 <> 0
-        ; Service already exists — just update the binary path
         SimpleSC::SetServiceBinaryPath "${SERVICE_NAME}" "$INSTDIR\${APP_EXE}"
         Pop $0
     ${EndIf}
@@ -94,6 +93,8 @@ Section "Phantom Pad" SecMain
     Pop $0
     SimpleSC::StartService "${SERVICE_NAME}" "" 30
     Pop $0
+
+    Call AddFirewallRule
 
     WriteUninstaller "$INSTDIR\uninstall.exe"
 
@@ -112,27 +113,12 @@ Section "Phantom Pad" SecMain
 SectionEnd
 
 Function ViGEmInstalled
-    SetRegView 64
-    StrCpy $0 0
-    StrCpy $3 0
-    loop:
-        EnumRegKey $1 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" $3
-        StrCmp $1 "" notfound
-
-        ReadRegStr $2 HKLM \
-            "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" \
-            "BundleUpgradeCode"
-        ${If} $2 == "${VIGEM_UPGCODE}"
-            StrCpy $0 1
-            SetRegView lastused
-            Return
-        ${EndIf}
-
-        IntOp $3 $3 + 1
-        Goto loop
-    notfound:
+    System::Call 'msi::MsiEnumRelatedProductsW(w "${VIGEM_UPGCODE}", i 0, i 0, w .r0) i.r1'
+    ${If} $1 = 0
+        StrCpy $0 1
+    ${Else}
         StrCpy $0 0
-        SetRegView lastused
+    ${EndIf}
 FunctionEnd
 
 Function InstallViGEm
@@ -153,7 +139,19 @@ Function InstallViGEm
     ${EndIf}
 FunctionEnd
 
+Function AddFirewallRule
+    DetailPrint "Adding Windows Firewall rule..."
+
+    ExecWait 'netsh advfirewall firewall add rule name="Phantom Pad" dir=in action=allow protocol=UDP localport=35700 program="$INSTDIR\${APP_EXE}" profile=any enable=yes' $0
+
+    ${If} $0 <> 0
+        DetailPrint "Firewall rule may already exist or failed to create."
+    ${EndIf}
+FunctionEnd
+
 Section "Uninstall"
+    ExecWait 'netsh advfirewall firewall delete rule name="Phantom Pad"' $0
+
     SimpleSC::StopService   "${SERVICE_NAME}" 1 30
     Pop $0
     SimpleSC::RemoveService "${SERVICE_NAME}"
@@ -178,26 +176,12 @@ Section "Uninstall"
 SectionEnd
 
 Function un.UninstallViGEm
-    SetRegView 64
-    StrCpy $0 0
-    loop:
-        EnumRegKey $1 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" $0
-        StrCmp $1 "" done
+    System::Call 'msi::MsiEnumRelatedProductsW(w "${VIGEM_UPGCODE}", i 0, i 0, w .r0) i.r1'
 
-        ReadRegStr $2 HKLM \
-            "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" \
-            "BundleUpgradeCode"
-        ${If} $2 == "${VIGEM_UPGCODE}"
-            ReadRegStr $3 HKLM \
-                "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$1" \
-                "QuietUninstallString"
-            SetRegView lastused
-            ExecWait '$3'
-            Return
-        ${EndIf}
-
-        IntOp $0 $0 + 1
-        Goto loop
-    done:
-        SetRegView lastused
+    ${If} $1 = 0
+        DetailPrint "Uninstalling ViGEmBus..."
+        ExecWait 'msiexec.exe /x $0 /qn /norestart' $2
+    ${Else}
+        DetailPrint "ViGEmBus not found."
+    ${EndIf}
 FunctionEnd
