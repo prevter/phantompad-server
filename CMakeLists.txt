@@ -32,7 +32,7 @@ else()
         ${PROJECT_NAME} PRIVATE
             -Wall -Wextra -Wpedantic -Werror
             -Wno-gnu-statement-expression-from-macro-expansion
-            -Wno-missing-designated-field-initializers
+            -Wno-missing-field-initializers
             -Wformat=2
     )
     target_compile_options(fmt PRIVATE -Wno-unused-result) # fmtlib 12.1.0 discards a nodiscard value

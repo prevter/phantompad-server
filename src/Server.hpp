@@ -127,8 +127,10 @@ namespace phant {
 
             std::memcpy(response.name, m_serverName.data(), response.nameLength);
 
-            if (m_clientMap.size() >= MAX_CLIENTS) {
-                response.status = 1;
+            if (packet.clientVersion != PROTOCOL_VERSION) {
+                response.status = ConnectStatus::VersionMismatch;
+            } else if (m_clientMap.size() >= MAX_CLIENTS) {
+                response.status = ConnectStatus::ServerFull;
             } else {
                 uint8_t slotId = 0;
                 for (; slotId < MAX_CLIENTS; ++slotId) {
@@ -150,7 +152,7 @@ namespace phant {
                 );
 
                 if (controllerResult) {
-                    response.status = 0;
+                    response.status = ConnectStatus::Success;
                     response.slotId = slotId;
 
                     // store client session
@@ -168,7 +170,12 @@ namespace phant {
                     m_clientMap[from] = slotId;
                     fmt::println("Client '{}' connected (slot {})", m_clients[slotId].name, slotId);
                 } else {
-                    response.status = 2;
+                    #ifdef _WIN32
+                    if (controllerResult.unwrapErr().starts_with("ViGEmBus"))
+                        response.status = ConnectStatus::ViGEmNotFound;
+                    else
+                    #endif
+                    response.status = ConnectStatus::ControllerInitFailure;
                     fmt::println(stderr, "Failed to create controller for client {}: {}", from.toString(), controllerResult.unwrapErr());
                 }
             }
