@@ -1,0 +1,12 @@
+[Unit]
+Description=PhantomPad Controller Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/phantompad
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
