@@ -18,6 +18,8 @@ namespace phant {
         RumbleCallback rumbleCallback,
         bool enableGyro
     ) {
+        (void) name; // ignore
+
         auto client = vigem_alloc();
         if (!client) {
             return geode::Err("Failed to allocate ViGEm client");

@@ -9,7 +9,11 @@ include(cmake/CPM.cmake)
 
 if (WIN32)
     set(PLATFORM_SOURCES src/socket/WinSocket.cpp src/utils/Win.cpp src/driver/ViGEm.cpp res/phantompad.rc)
+
     CPMAddPackage("gh:nefarius/ViGEmClient@1.21.222.0")
+    if (NOT MSVC)
+        target_compile_options(ViGEmClient PRIVATE -Wno-pragma-pack)
+    endif()
 elseif (UNIX)
     set(PLATFORM_SOURCES src/socket/UnixSocket.cpp src/utils/Unix.cpp src/driver/UInput.cpp)
 else()
@@ -21,11 +25,23 @@ add_executable(${PROJECT_NAME} src/Main.cpp ${PLATFORM_SOURCES})
 CPMAddPackage("gh:fmtlib/fmt#12.1.0")
 CPMAddPackage("gh:geode-sdk/result@1.4.1")
 
+if (MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX /permissive-)
+else()
+    target_compile_options(
+        ${PROJECT_NAME} PRIVATE
+            -Wall -Wextra -Wpedantic -Werror
+            -Wno-gnu-statement-expression-from-macro-expansion
+            -Wno-missing-designated-field-initializers
+            -Wformat=2
+    )
+    target_compile_options(fmt PRIVATE -Wno-unused-result) # fmtlib 12.1.0 discards a nodiscard value
+endif()
+
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt GeodeResult)
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ViGEmClient ws2_32 setupapi)
-
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 elseif (UNIX)
     include(GNUInstallDirs)

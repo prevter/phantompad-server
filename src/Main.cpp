@@ -73,7 +73,7 @@ static int runAsService() {
 
 void signalHandler(int) { server.stop(); }
 
-int main(int argc, char const** argv) {
+int main() {
     std::signal(SIGINT, signalHandler);
     std::signal(SIGTERM, signalHandler);
 

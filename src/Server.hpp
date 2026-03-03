@@ -176,7 +176,7 @@ namespace phant {
             (void) this->send(from, response);
         }
 
-        void onDisconnect(ClientEndpoint const& from, DisconnectPacket const& packet) {
+        void onDisconnect(ClientEndpoint const& from, DisconnectPacket const&) {
             auto it = m_clientMap.find(from);
             if (it != m_clientMap.end()) {
                 fmt::println("Client '{}' disconnected (slot {})", m_clients[it->second].name, it->second);

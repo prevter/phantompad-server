@@ -39,7 +39,7 @@ namespace phant {
         ServerIcon icon = ServerIcon::Generic;
         uint64_t timestamp; // copied from client's request for latency calculation
         uint8_t nameLength;
-        char name[255]; // UTF-8 encoded server name
+        char name[255]{}; // UTF-8 encoded server name
 
         static constexpr size_t minSize = 11; // type + icon + timestamp + nameLength
         constexpr size_t wireSize() const { return minSize + nameLength; }
@@ -48,7 +48,7 @@ namespace phant {
     struct ConnectRequestPacket {
         PacketType type = PacketType::ConnectRequest;
         uint8_t nameLength;
-        char name[255]; // UTF-8 encoded client name
+        char name[255]{}; // UTF-8 encoded client name
 
         static constexpr size_t minSize = 2; // type + nameLength
         constexpr size_t wireSize() const { return minSize + nameLength; }
@@ -56,10 +56,10 @@ namespace phant {
 
     struct ConnectResponsePacket {
         PacketType type = PacketType::ConnectResponse;
-        uint8_t status;  // 0 for success, non-zero for failure
-        uint8_t slotId;  // assigned device slot ID (0-7)
+        uint8_t status = 0; // 0 for success, non-zero for failure
+        uint8_t slotId = 0; // assigned device slot ID (0-7)
         uint8_t nameLength;
-        char name[255]; // UTF-8 encoded server name
+        char name[255]{};   // UTF-8 encoded server name
 
         static constexpr size_t minSize = 4; // type + status + slotId + nameLength
         constexpr size_t wireSize() const { return minSize + nameLength; }
