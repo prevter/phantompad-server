@@ -48,6 +48,6 @@ elseif (UNIX)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     install(
         FILES ${CMAKE_CURRENT_SOURCE_DIR}/installer/phantompad.service
-        DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}/systemd/system
+        DESTINATION /etc/systemd/system
     )
 endif()

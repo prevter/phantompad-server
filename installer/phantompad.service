@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/phantompad
+ExecStart=/usr/local/bin/phantompad
 Restart=on-failure
 RestartSec=5
 
